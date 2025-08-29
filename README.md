@@ -1,0 +1,4 @@
+- workout.py - Gives a workout based on your inputs.
+- vpnchecker.py - Tests if your VPN is working.
+- onion_server.py - .onion server (Extra steps required)
+- chordprogressionscript.py - Python code to generate basic .midi chord progression.
