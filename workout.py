@@ -1,60 +1,69 @@
-import random
-
-print("=== Workout AI 💪 ===")
+print("=== Workout AI v2 💪 ===")
 
 # Ask user for input
 mood = input("How do you feel today? (tired / normal / energetic): ").lower()
 goal = input("What is your goal? (strength / endurance / mobility): ").lower()
 time = int(input("How many minutes do you have? (10 / 20 / 45): "))
 
-# Some basic workout options
-workouts = {
-    "strength": [
-        "Push-ups 3x12",
-        "Squats 3x15",
-        "Plank 3x30s",
-        "Lunges 3x10 each leg",
-        "Dips 3x10"
-    ],
-    "endurance": [
-        "Jumping jacks 2 min",
-        "Burpees 3x10",
-        "Mountain climbers 3x20s",
-        "High knees 3x30s",
-        "Skipping rope 3 min"
-    ],
-    "mobility": [
-        "Cat-cow stretch 5 reps",
-        "Child’s pose 30s",
-        "Hip circles 5 each side",
-        "Arm swings 10 reps",
-        "Neck rolls 5 each side"
-    ]
+# Base workout templates
+templates = {
+    "strength": {
+        "warmup": "5 min dynamic warm-up (jumping jacks, arm swings)",
+        "main": [
+            "Push-ups 3x12",
+            "Squats 3x15",
+            "Lunges 3x10 each leg"
+        ],
+        "finisher": "Plank 3x30s"
+    },
+    "endurance": {
+        "warmup": "2 min jogging in place",
+        "main": [
+            "Burpees 3x10",
+            "Mountain climbers 3x20s",
+            "High knees 3x30s"
+        ],
+        "finisher": "Skipping rope 2 min"
+    },
+    "mobility": {
+        "warmup": "Neck rolls + shoulder rolls, 1 min",
+        "main": [
+            "Cat-cow stretch 5 reps",
+            "Hip circles 5 each side",
+            "Child’s pose 30s"
+        ],
+        "finisher": "Full body stretch 2 min"
+    }
 }
 
-# Pick routine length based on time
-if time <= 10:
-    num_exercises = 3
-elif time <= 20:
-    num_exercises = 4
-else:
-    num_exercises = 5
-
-# Adjust intensity based on mood
+# Mood adjustments
 if mood == "tired":
-    chosen_goal = "mobility"
-elif mood == "energetic":
-    chosen_goal = goal  # stick to what they want
+    goal = "mobility"  # override
+elif mood == "energetic" and goal == "mobility":
+    goal = "endurance"  # push harder
+
+# Adjust workout length
+if time <= 10:
+    plan_type = "short"
+elif time <= 20:
+    plan_type = "medium"
 else:
-    chosen_goal = goal  # balanced
-    # could add modifications later
+    plan_type = "long"
 
-# Randomly choose exercises
-plan = random.sample(workouts[chosen_goal], num_exercises)
+# Build plan
+chosen = templates[goal]
 
-# Print workout plan
 print("\n🔥 Your Workout Plan 🔥")
-for i, exercise in enumerate(plan, 1):
-    print(f"{i}. {exercise}")
+print("Warm-up:", chosen["warmup"])
 
-print("\nGood luck! Stay consistent 💯")
+if plan_type == "short":
+    print("Main:", chosen["main"][0])
+elif plan_type == "medium":
+    for exercise in chosen["main"][:2]:
+        print("Main:", exercise)
+else:  # long
+    for exercise in chosen["main"]:
+        print("Main:", exercise)
+
+print("Finisher:", chosen["finisher"])
+print("\nStay strong! 💯")
