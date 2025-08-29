@@ -1,69 +1,82 @@
-print("=== Workout AI v2 💪 ===")
+import random
+import json
+import os
 
-# Ask user for input
+print("=== Workout AI v3 🤖💪 ===")
+
+# Save file for workout history
+SAVE_FILE = "workout_history.json"
+
+# Load past data
+if os.path.exists(SAVE_FILE):
+    with open(SAVE_FILE, "r") as f:
+        history = json.load(f)
+else:
+    history = {"sessions": 0, "last_goal": None}
+
+# Ask user
 mood = input("How do you feel today? (tired / normal / energetic): ").lower()
 goal = input("What is your goal? (strength / endurance / mobility): ").lower()
 time = int(input("How many minutes do you have? (10 / 20 / 45): "))
 
-# Base workout templates
-templates = {
-    "strength": {
-        "warmup": "5 min dynamic warm-up (jumping jacks, arm swings)",
-        "main": [
-            "Push-ups 3x12",
-            "Squats 3x15",
-            "Lunges 3x10 each leg"
-        ],
-        "finisher": "Plank 3x30s"
-    },
-    "endurance": {
-        "warmup": "2 min jogging in place",
-        "main": [
-            "Burpees 3x10",
-            "Mountain climbers 3x20s",
-            "High knees 3x30s"
-        ],
-        "finisher": "Skipping rope 2 min"
-    },
-    "mobility": {
-        "warmup": "Neck rolls + shoulder rolls, 1 min",
-        "main": [
-            "Cat-cow stretch 5 reps",
-            "Hip circles 5 each side",
-            "Child’s pose 30s"
-        ],
-        "finisher": "Full body stretch 2 min"
-    }
+# Exercise pool
+workouts = {
+    "strength": [
+        "Push-ups {reps} reps",
+        "Squats {reps} reps",
+        "Lunges {reps} reps each leg",
+        "Dips {reps} reps",
+        "Plank {time}s"
+    ],
+    "endurance": [
+        "Burpees {reps} reps",
+        "Mountain climbers {time}s",
+        "High knees {time}s",
+        "Jumping jacks {time}s",
+        "Skipping rope {time}s"
+    ],
+    "mobility": [
+        "Cat-cow stretch {reps} reps",
+        "Child’s pose {time}s",
+        "Hip circles {reps} reps each side",
+        "Arm swings {reps} reps",
+        "Neck rolls {reps} reps each side"
+    ]
 }
 
-# Mood adjustments
+# AI Adjustment:
+sessions = history["sessions"]
+
+# Increase difficulty every 3 sessions
+base_reps = 10 + (sessions // 3) * 2
+base_time = 20 + (sessions // 3) * 5
+
+# Tired = easier, energetic = harder
 if mood == "tired":
-    goal = "mobility"  # override
-elif mood == "energetic" and goal == "mobility":
-    goal = "endurance"  # push harder
+    base_reps = max(5, base_reps - 5)
+    base_time = max(10, base_time - 10)
+elif mood == "energetic":
+    base_reps += 5
+    base_time += 10
 
-# Adjust workout length
-if time <= 10:
-    plan_type = "short"
-elif time <= 20:
-    plan_type = "medium"
+# Pick exercises (avoid repeating last goal if possible)
+if history["last_goal"] == goal:
+    chosen_goal = random.choice([g for g in workouts.keys() if g != goal])
 else:
-    plan_type = "long"
+    chosen_goal = goal
 
-# Build plan
-chosen = templates[goal]
+num_exercises = 3 if time <= 10 else 4 if time <= 20 else 5
+plan = random.sample(workouts[chosen_goal], num_exercises)
 
-print("\n🔥 Your Workout Plan 🔥")
-print("Warm-up:", chosen["warmup"])
+# Generate workout plan with reps/time filled in
+print("\n🔥 Your Adaptive Workout Plan 🔥")
+for i, exercise in enumerate(plan, 1):
+    print(f"{i}. " + exercise.format(reps=base_reps, time=base_time))
 
-if plan_type == "short":
-    print("Main:", chosen["main"][0])
-elif plan_type == "medium":
-    for exercise in chosen["main"][:2]:
-        print("Main:", exercise)
-else:  # long
-    for exercise in chosen["main"]:
-        print("Main:", exercise)
+print(f"\n(Session {sessions + 1}) — getting stronger each time 💯")
 
-print("Finisher:", chosen["finisher"])
-print("\nStay strong! 💯")
+# Save updated history
+history["sessions"] += 1
+history["last_goal"] = chosen_goal
+with open(SAVE_FILE, "w") as f:
+    json.dump(history, f)
